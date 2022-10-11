@@ -16,7 +16,7 @@
 # https://www.raspberrypi-spy.co.uk/?s=bh1750
 #
 #---------------------------------------------------------------------
-import smbus
+import smbus   # ImportError: No module named 'smbus'
 import time
 
 # Define some constants from the datasheet
