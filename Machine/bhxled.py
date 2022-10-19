@@ -1,5 +1,6 @@
-import RPi.GPIO as GPIO  #RGB LED
-import smbus             #bh1750
+import RPi.GPIO as GPIO          #RGB LED
+import smbus                     #bh1750
+from picamera import PiCamera    #Camera
 import time
 
 DEVICE     = 0x23 
@@ -31,6 +32,8 @@ blue = 15  # Set up Blue pin
 GPIO.setup(red, GPIO.OUT)
 GPIO.setup(green, GPIO.OUT)
 GPIO.setup(blue, GPIO.OUT)
+
+camera = PiCamera()
 
 def turnOff():
     GPIO.output(red,GPIO.LOW)
@@ -64,6 +67,11 @@ def main():
       time.sleep(3)
       if lightLevel == 0.0:
           white()
+          camera.start_preview()
+          time.sleep(5)
+          camera.capture('/home/pi/Desktop/image.jpg')
+          camera.stop_preview()
+          
           
           
             
