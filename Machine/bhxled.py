@@ -21,12 +21,27 @@ red = 13  # Set up Red pin
 green = 11  # Set up Green pin
 blue = 15  # Set up Blue pin
 
+GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BOARD)  # Set GPIO mode to BOARD to use pin numbers
+
+red = 13  # Set up Red pin
+green = 11  # Set up Green pin
+blue = 15  # Set up Blue pin
+
 GPIO.setup(red, GPIO.OUT)
 GPIO.setup(green, GPIO.OUT)
 GPIO.setup(blue, GPIO.OUT)
 
-white_led = (1, 1, 1)  # Set LED color
+def turnOff():
+    GPIO.output(red,GPIO.LOW)
+    GPIO.output(green,GPIO.LOW)
+    GPIO.output(blue,GPIO.LOW)
+    
+def white():
+    GPIO.output(red,GPIO.HIGH)
+    GPIO.output(green,GPIO.HIGH)
+    GPIO.output(blue,GPIO.HIGH)
+    time.sleep(10)
 
 def convertToNumber(data):
   # Simple function to convert 2 bytes of data
@@ -43,14 +58,15 @@ def readLight(addr=DEVICE):
 def main():
     
   while True:
-    lightLevel=readLight()
-    print("Light Level : " + format(lightLevel,'.1f') + " lx")
-    time.sleep(0.5)
-    if lightLevel == 0.0:
-        GPIO.output()
+      turnOff()
+      lightLevel=readLight()
+      print("Light Level : " + format(lightLevel,'.1f') + " lx")
+      time.sleep(3)
+      if lightLevel == 0.0:
+          white()
+          
+          
             
-    else:
-        GPIO.cleanup()  # Clear GPIO
     
 
 if __name__=="__main__":
