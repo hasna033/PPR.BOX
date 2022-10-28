@@ -2,7 +2,7 @@ import RPi.GPIO as GPIO          #RGB LED
 import smbus                     #bh1750
 from picamera import PiCamera    #Camera
 from PIL import Image
-import tesseract
+from pytesseract import pytesseract
 import cv2
 import os
 import time
@@ -39,6 +39,7 @@ GPIO.setup(blue, GPIO.OUT)
 
 camera = PiCamera()
 
+tesseract_cmd = 'tesseract'
 
 def turnOff():
     GPIO.output(red,GPIO.LOW)
@@ -118,7 +119,10 @@ def main():
           camera.stop_preview()
           turnOff()
 #           get_string('/home/pi/DEProject/images/input3.jpg')
-          print(pytesseract.image_to_string(Image.open('/home/pi/DEProject/images/input3.jpg')))
+          
+          img = Image.open('/home/pi/DEProject/images/input3.jpg')
+          text = pytesseract.image_to_string(img)
+          print(text)
           
            
           break
