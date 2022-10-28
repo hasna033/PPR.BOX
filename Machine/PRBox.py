@@ -2,8 +2,9 @@ import RPi.GPIO as GPIO          #RGB LED
 import smbus                     #bh1750
 from picamera import PiCamera    #Camera
 from PIL import Image
-import pytesseract
+import tesseract
 import cv2
+import os
 import time
 
 DEVICE     = 0x23 
@@ -38,6 +39,7 @@ GPIO.setup(blue, GPIO.OUT)
 
 camera = PiCamera()
 
+
 def turnOff():
     GPIO.output(red,GPIO.LOW)
     GPIO.output(green,GPIO.LOW)
@@ -61,6 +63,43 @@ def readLight(addr=DEVICE):
   data = bus.read_i2c_block_data(addr,ONE_TIME_HIGH_RES_MODE_1)
   return convertToNumber(data)
     
+# def get_string(img_path):
+#     # Read image using opencv
+#     img = cv2.imread(img_path)
+# 
+#     # Extract the file name without the file extension
+#     file_name = os.path.basename(img_path).split('.')[0]
+#     file_name = file_name.split()[0]
+# 
+#     # Create a directory for outputs
+#     output_path = os.path.join(output_dir, file_name)
+#     if not os.path.exists(output_path):
+#         os.makedirs(output_path)
+#         
+#         # Rescale the image, if needed.
+#         img = cv2.resize(img, None, fx=1.5, fy=1.5, interpolation=cv2.INTER_CUBIC)
+# 
+#         # Convert to gray
+#         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+# 
+#         # Apply dilation and erosion to remove some noise
+#         kernel = np.ones((1, 1), np.uint8)
+#         img = cv2.dilate(img, kernel, iterations=1)
+#         img = cv2.erode(img, kernel, iterations=1)
+#         # Apply blur to smooth out the edges
+#         img = cv2.GaussianBlur(img, (5, 5), 0)
+#         
+#         # Apply threshold to get image with only b&w (binarization)
+#         img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+#         
+#         # Save the filtered image in the output directory
+#         save_path = os.path.join(output_path, file_name + "_filter_" + str(method) + ".jpg")
+#         cv2.imwrite(save_path, img)
+# 
+#         # Recognize text with tesseract for python
+#         result = pytesseract.image_to_string(img, lang="eng")
+#         return result
+
 
 def main():
     
@@ -78,16 +117,10 @@ def main():
           camera.capture('/home/pi/DEProject/images/input3.jpg')
           camera.stop_preview()
           turnOff()
+#           get_string('/home/pi/DEProject/images/input3.jpg')
+          print(pytesseract.image_to_string(Image.open('/home/pi/DEProject/images/input3.jpg')))
           
-#           img = cv2.imread('4.png',cv2.IMREAD_COLOR) #Open the image from which charectors has to be recognized
-#           gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) #convert to grey to reduce detials
-#           gray = cv2.bilateralFilter(gray, 11, 17, 17) #Blur to reduce noise
-#           original = pytesseract.image_to_string(gray, config='')
-#           print (original)
-#
-           image =Image.open ('./DEProject/images/input3.jpg')
-           text = pytesseract.image_to_string(img, config='')
-           print (text)
+           
           break
           
     
