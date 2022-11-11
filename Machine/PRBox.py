@@ -39,7 +39,8 @@ GPIO.setup(blue, GPIO.OUT)
 
 camera = PiCamera()
 
-tesseract_cmd = 'tesseract'
+# Path to the location of the Tesseract-OCR executable/command
+pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
 def turnOff():
     GPIO.output(red,GPIO.LOW)
@@ -49,7 +50,7 @@ def turnOff():
 def led():
     GPIO.output(red,GPIO.HIGH)
     GPIO.output(green,GPIO.HIGH)
-    GPIO.output(blue,GPIO.LOW)
+    GPIO.output(blue,GPIO.HIGH)
     
 
 def convertToNumber(data):
@@ -63,80 +64,77 @@ def readLight(addr=DEVICE):
   # Read data from I2C interface
   data = bus.read_i2c_block_data(addr,ONE_TIME_HIGH_RES_MODE_1)
   return convertToNumber(data)
-    
-# def get_string(img_path):
-#     # Read image using opencv
-#     img = cv2.imread(img_path)
-# 
-#     # Extract the file name without the file extension
-#     file_name = os.path.basename(img_path).split('.')[0]
-#     file_name = file_name.split()[0]
-# 
-#     # Create a directory for outputs
-#     output_path = os.path.join(output_dir, file_name)
-#     if not os.path.exists(output_path):
-#         os.makedirs(output_path)
-#         
-#         # Rescale the image, if needed.
-#         img = cv2.resize(img, None, fx=1.5, fy=1.5, interpolation=cv2.INTER_CUBIC)
-# 
-#         # Convert to gray
-#         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-# 
-#         # Apply dilation and erosion to remove some noise
-#         kernel = np.ones((1, 1), np.uint8)
-#         img = cv2.dilate(img, kernel, iterations=1)
-#         img = cv2.erode(img, kernel, iterations=1)
-#         # Apply blur to smooth out the edges
-#         img = cv2.GaussianBlur(img, (5, 5), 0)
-#         
-#         # Apply threshold to get image with only b&w (binarization)
-#         img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
-#         
-#         # Save the filtered image in the output directory
-#         save_path = os.path.join(output_path, file_name + "_filter_" + str(method) + ".jpg")
-#         cv2.imwrite(save_path, img)
-# 
-#         # Recognize text with tesseract for python
-#         result = pytesseract.image_to_string(img, lang="eng")
-#         return result
 
+def read_text_from_image(image):
+  """Reads text from an image file and outputs found text to text file"""
+  # Convert the image to grayscale
+  gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-def main():
+  # Perform OTSU Threshold
+  ret, thresh = cv2.threshold(gray_image, 0, 255, cv2.THRESH_OTSU | cv2.THRESH_BINARY_INV)
+
+  rect_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (18, 18))
+
+  dilation = cv2.dilate(thresh, rect_kernel, iterations = 1)
+
+  _, contours, hierachy = cv2.findContours(dilation, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+  
+  image_copy = image.copy()
+
+  result = ""
+
+  for contour in contours:
+    x, y, w, h = cv2.boundingRect(contour)
+
+    cropped = image_copy[y : y + h, x : x + w]
+
+    file = open("results.txt", "r")
+
+    text = pytesseract.image_to_string(cropped)
     
-  while True:
-      turnOff()
-      lightLevel=readLight()
-      print("Light Level : " + format(lightLevel,'.1f') + " lx")
-      time.sleep(1)
-      if lightLevel == 0.0:
-          led()
-          time.sleep(5)
-          camera.rotation = 90
-          camera.start_preview()
-          time.sleep(1)
-          camera.capture('/home/pi/DEProject/images/input3.jpg')
-          camera.stop_preview()
-          turnOff()
-#           get_string('/home/pi/DEProject/images/input3.jpg')
-          
-          img = Image.open('/home/pi/DEProject/images/input3.jpg')
-          text = pytesseract.image_to_string(img)
-          print(text)
-          
-           
-          break
-          
+    r = file.readlines()
+    for i in range(2):
+        print(r[i])
+        
+    result += text
     
-      
+#     print(x, y, w, h, text)
+
+#     file.write(text)
+#     file.write("\n")
+
+  file.close()
+  return result
           
-          
-          
-            
-    
+def mrz_data(text)
 
 if __name__=="__main__":
-   main()
+#     main()
+
+      while True:
+#           turnOff()
+#           lightLevel=readLight()
+#           print("Light Level : " + format(lightLevel,'.1f') + " lx")
+#           time.sleep(1)
+#           if lightLevel < 10:
+#               led()
+#               time.sleep(5)
+#               camera.rotation = 90
+#               camera.start_preview()
+#               time.sleep(1)
+#               camera.capture('/home/pi/DEProject/images/input8.jpg')
+#               camera.stop_preview()
+#               turnOff()
+#           
+              image = cv2.imread("/home/pi/DEProject/images/input8.jpg")
+              text = read_text_from_image(image)  
+              print(text)          
+                  
+              
+              
+              
+              break
+
 
 
 
