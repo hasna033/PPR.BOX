@@ -68,7 +68,9 @@ def readLight(addr=DEVICE):
   # Read data from I2C interface
   data = bus.read_i2c_block_data(addr,ONE_TIME_HIGH_RES_MODE_1)
   return convertToNumber(data)
-    
+
+def select_line(string, line_index):
+    return string.splitlines()[line_index]
 
 if __name__=="__main__":
 #     main()
@@ -90,22 +92,18 @@ if __name__=="__main__":
 #           
               img = Image.open("/home/pi/DEProject/images/input8.jpg")
               text = pytesseract.image_to_string(img)
-              with open(text)as fp:
-                  line =fp.readline()
-                  cnt = 1
-                  while line:
-                      print("Line {}: {}".format(cnt, line.strip()))
-                      line = fp.readline()
-                      cnt += 1
               
-#               print(text)
+              ## Find the locate of MRZ data
+              thisList = text.splitlines()
+#               print(text.splitlines())
+              print(len(thisList))
+              print(thisList[48:50])
+              
+              
+              
               
               # for-loop find line
-              for i in range():
-                  print("*********")
-                  print(text.readline(5))
-                  
-              
+#               print("*********")
               
               
               break
