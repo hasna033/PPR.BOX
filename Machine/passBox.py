@@ -68,43 +68,6 @@ def readLight(addr=DEVICE):
   # Read data from I2C interface
   data = bus.read_i2c_block_data(addr,ONE_TIME_HIGH_RES_MODE_1)
   return convertToNumber(data)
-
-# def read_text_from_image(image):
-#   """Reads text from an image file and outputs found text to text file"""
-#   # Convert the image to grayscale
-#   gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-# 
-#   # Perform OTSU Threshold
-#   ret, thresh = cv2.threshold(gray_image, 0, 255, cv2.THRESH_OTSU | cv2.THRESH_BINARY_INV)
-# 
-#   rect_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (18, 18))
-# 
-#   dilation = cv2.dilate(thresh, rect_kernel, iterations = 1)
-# 
-#   _, contours, hierachy = cv2.findContours(dilation, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-#   
-#   image_copy = image.copy()
-# 
-#   result = ""
-# 
-#   for contour in contours:
-#     x, y, w, h = cv2.boundingRect(contour)
-# 
-#     cropped = image_copy[y : y + h, x : x + w]
-# 
-#     file = open("results.txt", "r")
-# 
-#     text = pytesseract.image_to_string(cropped)
-#     
-#     result += text
-#     
-# #     print(x, y, w, h, text)
-# 
-# #     file.write(text)
-# #     file.write("\n")
-# 
-#   file.close()
-#   return result
     
 
 if __name__=="__main__":
@@ -127,7 +90,20 @@ if __name__=="__main__":
 #           
               img = Image.open("/home/pi/DEProject/images/input8.jpg")
               text = pytesseract.image_to_string(img)
-              print(text)          
+              with open(text)as fp:
+                  line =fp.readline()
+                  cnt = 1
+                  while line:
+                      print("Line {}: {}".format(cnt, line.strip()))
+                      line = fp.readline()
+                      cnt += 1
+              
+#               print(text)
+              
+              # for-loop find line
+              for i in range():
+                  print("*********")
+                  print(text.readline(5))
                   
               
               
