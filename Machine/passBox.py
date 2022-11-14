@@ -69,7 +69,6 @@ def readLight(addr=DEVICE):
   data = bus.read_i2c_block_data(addr,ONE_TIME_HIGH_RES_MODE_1)
   return convertToNumber(data)
 
-
 if __name__=="__main__":
 #     main()
 
@@ -93,15 +92,71 @@ if __name__=="__main__":
               
               ## Find the locate of MRZ data
 #               print(len(text))       // 439
-              print(text[336:430])
+#               print(text[336:430])
               ##  MRZ location
               MRZ_1 = text[336:386]
               MRZ_2 = text[387:430]
-              print(MRZ_1)
-              print(MRZ_2)
+#               print(MRZ_1)
+#               print(MRZ_2)
               
-              ### separate data
+              ### separate data mrz 1
+              if MRZ_1:
+                  ns=""
+                  for i in MRZ_1:
+                      if(not i.isspace()):
+                          ns+=i
+#                   print(ns)
+                  mrz1 = ns
+                  
+                  tPass = mrz1[0]        # P, indicating a passport
+#                   print("Type : ", tPass)
+                  tCode = mrz1[2:5]      # Type for countries
+#                   print("Type :" tCode)
+                  
+                  name = mrz1[5:44]      # Name & Seurname -> ????
+#                   print(name)
+                  
+                  sName = ""
+                  fName = ""
+                  for i in name:
+                      if (i != '<'):
+                          sName+=i
+                      else:
+                          break
+                   
+#                   print(sName)
+#                   print(fName)
               
+               ### separate data mrz 2
+              if MRZ_2:
+                  ns=""
+                  for i in MRZ_2:
+                      if(not i.isspace()):
+                          ns+=i
+#                   print(ns)
+                  mrz2 = ns
+                  print(mrz2)
+                  
+                  passNum = mrz2[0:9]          # Passport number
+                  print("Passport Number: ", passNum)
+                  
+                  nCode = mrz2[10:13]          # Nationality Code
+                  print("Nationality: ", nCode)
+                  
+                  DOB = mrz2[13:19]           # Date of birth (YYMMDD)
+                  print("Date of birth : ", DOB)
+                  
+                  sex = mrz2[20]           # Sex  (M, F or < for male, female or unspecified)
+                  print("Sex : ", sex)
+                  
+                  EDP = mrz2[21:27]           # Expiration date of passport (YYMMDD)
+                  print("Expiration date of passport : ", EDP)
+                  
+                  persNum = mrz2[28:41]          # Personal number
+                  print("Personal number : ", persNum)
+                  
+                  
+                    
 
               
                   
