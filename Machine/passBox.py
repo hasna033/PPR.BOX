@@ -69,8 +69,6 @@ def readLight(addr=DEVICE):
   data = bus.read_i2c_block_data(addr,ONE_TIME_HIGH_RES_MODE_1)
   return convertToNumber(data)
 
-def select_line(string, line_index):
-    return string.splitlines()[line_index]
 
 if __name__=="__main__":
 #     main()
@@ -94,16 +92,23 @@ if __name__=="__main__":
               text = pytesseract.image_to_string(img)
               
               ## Find the locate of MRZ data
-              thisList = text.splitlines()
-#               print(text.splitlines())
-              print(len(thisList))
-              print(thisList[48:50])
+#               print(len(text))       // 439
+              print(text[336:430])
+              ##  MRZ location
+              MRZ_1 = text[336:386]
+              MRZ_2 = text[387:430]
+              print(MRZ_1)
+              print(MRZ_2)
+              
+              ### separate data
+              
+
+              
+                  
+                  
+                  
               
               
-              
-              
-              # for-loop find line
-#               print("*********")
               
               
               break
