@@ -73,22 +73,23 @@ if __name__=="__main__":
 #     main()
 
       while True:
-#           turnOff()
-#           lightLevel=readLight()
-#           print("Light Level : " + format(lightLevel,'.1f') + " lx")
-#           time.sleep(1)
-#           if lightLevel < 10:
-#               led()
-#               time.sleep(5)
-#               camera.rotation = 90
-#               camera.start_preview()
-#               time.sleep(1)
-#               camera.capture('/home/pi/DEProject/images/input8.jpg')
-#               camera.stop_preview()
-#               turnOff()
-#           
+          turnOff()
+          lightLevel=readLight()
+          print("Light Level : " + format(lightLevel,'.1f') + " lx")
+          time.sleep(1)
+          if lightLevel < 10:
+              led()
+              time.sleep(5)
+              camera.rotation = 90
+              camera.start_preview()
+              time.sleep(1)
+              camera.capture('/home/pi/DEProject/images/input8.jpg')
+              camera.stop_preview()
+              turnOff()
+          
               img = Image.open("/home/pi/DEProject/images/input8.jpg")
               text = pytesseract.image_to_string(img)
+              print("Raw:", text)
               
               ## Find the locate of MRZ data
 #               print(len(text))       // 439
@@ -96,8 +97,8 @@ if __name__=="__main__":
               ##  MRZ location
               MRZ_1 = text[336:386]
               MRZ_2 = text[387:430]
-#               print(MRZ_1)
-#               print(MRZ_2)
+              print("Raw Line 1: ", MRZ_1)
+              print("Raw Line 2:", MRZ_2)
               
               ### separate data mrz 1
               if MRZ_1:
@@ -108,25 +109,19 @@ if __name__=="__main__":
 #                   print(ns)
                   mrz1 = ns
                   
-                  tPass = mrz1[0]        # P, indicating a passport
+                  firstPart = mrz1.split("<<")[0]
+                  
+                  tPass = firstPart[0]        # P, indicating a passport
 #                   print("Type : ", tPass)
-                  tCode = mrz1[2:5]      # Type for countries
+                  tCode = firstPart[2:5]      # Type for countries
 #                   print("Type :" tCode)
                   
-                  name = mrz1[5:44]      # Name & Seurname -> ????
-#                   print(name)
+                  lastname = firstPart[5:len(firstPart)].replace("<", "-")      # Name & Seurname -> ????
+                  print("Lastname: ",lastname)
                   
-                  sName = ""
-                  fName = ""
-                  for i in name:
-                      if (i != '<'):
-                          sName+=i
-                      else:
-                          break
-                   
-#                   print(sName)
-#                   print(fName)
-              
+                  firstname = mrz1.split("<<")[1].replace("<","")
+                  print("Firstname: ",firstname) 
+
                ### separate data mrz 2
               if MRZ_2:
                   ns=""
