@@ -1,50 +1,38 @@
 import RPi.GPIO as GPIO          #RGB LED
-import smbus                     #bh1750
 from picamera import PiCamera    #Camera
 from PIL import Image
 from pytesseract import pytesseract
-import cv2
 import os
 import time
 
-DEVICE     = 0x23 
-
-POWER_DOWN = 0x00 # No active state
-POWER_ON   = 0x01 # Power on
-RESET      = 0x07 # Reset data register value
-
-CONTINUOUS_LOW_RES_MODE = 0x13
-CONTINUOUS_HIGH_RES_MODE_1 = 0x10
-CONTINUOUS_HIGH_RES_MODE_2 = 0x11
-ONE_TIME_HIGH_RES_MODE_1 = 0x20
-ONE_TIME_HIGH_RES_MODE_2 = 0x21
-ONE_TIME_LOW_RES_MODE = 0x23
-
-bus = smbus.SMBus(1)  # Rev 2 Pi uses 1
-
-red = 13  # Set up Red pin
-green = 11  # Set up Green pin
-blue = 15  # Set up Blue pin
+red = 13            # Set up Red pin
+green = 11          # Set up Green pin
+blue = 15           # Set up Blue pin
+button = 18         # Set up button pin -> input
 
 GPIO.setwarnings(False)
-GPIO.setmode(GPIO.BOARD)  # Set GPIO mode to BOARD to use pin numbers
-
-red = 13  # Set up Red pin
-green = 11  # Set up Green pin
-blue = 15  # Set up Blue pin
+GPIO.setmode(GPIO.BOARD)       # Set GPIO mode to BOARD to use pin numbers
 
 GPIO.setup(red, GPIO.OUT)
 GPIO.setup(green, GPIO.OUT)
 GPIO.setup(blue, GPIO.OUT)
+GPIO.setup(button, GPIO.IN, pull_up_down = GPIO.PUD_UP)
 
 camera = PiCamera()
 
 # Path to the location of the Tesseract-OCR executable/command
 path_to_tesseract = r'/usr/bin/tesseract'
-
-#Point tessaract_cmd to tessaract.exe
 pytesseract.tesseract_cmd = path_to_tesseract
 
+date_string = time.strftime("%Y-%m-%d-%H:%M")
+
+# # This outputFunction is executed on signal detection
+# def outputFunction(null):
+#         print("Signal detected")
+# 
+# # When a signal is detected (falling signal edge) the output function is executed
+# GPIO.add_event_detect(button, GPIO.FALLING, callback=outputFunction, bouncetime=100) 
+  
 
 def turnOff():
     GPIO.output(red,GPIO.LOW)
@@ -57,68 +45,93 @@ def led():
     GPIO.output(blue,GPIO.HIGH)
     
 
-def convertToNumber(data):
-  # Simple function to convert 2 bytes of data
-  # into a decimal number. Optional parameter 'decimals'
-  # will round to specified number of decimal places.
-  result=(data[1] + (256 * data[0])) / 1.2
-  return (result)
-
-def readLight(addr=DEVICE):
-  # Read data from I2C interface
-  data = bus.read_i2c_block_data(addr,ONE_TIME_HIGH_RES_MODE_1)
-  return convertToNumber(data)
-
-def select_line(string, line_index):
-    return string.splitlines()[line_index]
-
 if __name__=="__main__":
 #     main()
-
+      print("Please press the Button to start the process.")
       while True:
-#           turnOff()
-#           lightLevel=readLight()
-#           print("Light Level : " + format(lightLevel,'.1f') + " lx")
-#           time.sleep(1)
-#           if lightLevel < 10:
-#               led()
-#               time.sleep(5)
-#               camera.rotation = 90
-#               camera.start_preview()
-#               time.sleep(1)
-#               camera.capture('/home/pi/DEProject/images/input8.jpg')
-#               camera.stop_preview()
-#               turnOff()
-#           
-              img = Image.open("/home/pi/DEProject/images/input8.jpg")
+          turnOff()
+          button_state = GPIO.input(button)
+          if button_state == False:
+              print("Start the process.")
+              led()
+              time.sleep(5)
+              
+              camera.rotation = 90
+              camera.start_preview()
+              time.sleep(1)
+              
+              camera.capture(r'/home/pi/DEProject/images/image-' + date_string + '.png')
+              camera.stop_preview()
+              turnOff()
+          
+              img = Image.open(r'/home/pi/DEProject/images/image-' + date_string + '.png')
               text = pytesseract.image_to_string(img)
               
-              ## Find the locate of MRZ data
-              thisList = text.splitlines()
-#               print(text.splitlines())
-#               print(len(thisList))
-#               print(thisList[48:50])
-              MRZ_1 = thisList[48:49]
-              MRZ_2 = thisList[49:50]
-#               print(MRZ_1)
-              
-              ### separate data
-              if (MRZ_1):
-                  print(MRZ_1)
-              
-                  
-                  
-              
-              
-              
-              
-              # for-loop find line
-#               print("*********")
-              
-              
+              print("Raw:", text)
               break
 
-
+              
+              ## Find the locate of MRZ data
+#               print(len(text))       // 439
+#               print(text[336:430])
+              ##  MRZ location
+#           MRZ_1 = text[336:386]
+#           MRZ_2 = text[387:430]
+#           print("Raw Line 1: ", MRZ_1)
+#           print("Raw Line 2:", MRZ_2)
+#               
+#               ### separate data mrz 1
+#               if MRZ_1:
+#                   ns=""
+#                   for i in MRZ_1:
+#                       if(not i.isspace()):
+#                           ns+=i
+# #                   print(ns)
+#                   mrz1 = ns
+#                   
+#                   firstPart = mrz1.split("<<")[0]
+#                   
+#                   tPass = firstPart[0]        # P, indicating a passport
+# #                   print("Type : ", tPass)
+#                   tCode = firstPart[2:5]      # Type for countries
+# #                   print("Type :" tCode)
+#                   
+#                   lastname = firstPart[5:len(firstPart)].replace("<", "-")      # Name & Seurname -> ????
+#                   print("Lastname: ",lastname)
+#                   
+#                   firstname = mrz1.split("<<")[1].replace("<","")
+#                   print("Firstname: ",firstname) 
+# 
+#                ### separate data mrz 2
+#               if MRZ_2:
+#                   ns=""
+#                   for i in MRZ_2:
+#                       if(not i.isspace()):
+#                           ns+=i
+# #                   print(ns)
+#                   mrz2 = ns
+#                   print(mrz2)
+#                   
+#                   passNum = mrz2[0:9]          # Passport number
+#                   print("Passport Number: ", passNum)
+#                   
+#                   nCode = mrz2[10:13]          # Nationality Code
+#                   print("Nationality: ", nCode)
+#                   
+#                   DOB = mrz2[13:19]           # Date of birth (YYMMDD)
+#                   print("Date of birth : ", DOB)
+#                   
+#                   sex = mrz2[20]           # Sex  (M, F or < for male, female or unspecified)
+#                   print("Sex : ", sex)
+#                   
+#                   EDP = mrz2[21:27]           # Expiration date of passport (YYMMDD)
+#                   print("Expiration date of passport : ", EDP)
+#                   
+#                   persNum = mrz2[28:41]          # Personal number
+#                   print("Personal number : ", persNum)
+#                   
+#
+            
 
 
 
