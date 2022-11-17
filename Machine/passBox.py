@@ -37,90 +37,91 @@ def led():
     GPIO.output(blue,GPIO.HIGH)
     
 def main():
-      while True:
-          print("Start the process./n")
-          led()
-          time.sleep(5)
+#       while True:
+    print("\nStart the process.\n")
+    led()
+    time.sleep(5)
           
-          ## Capture passport picture
-          camera.rotation = 90
-          camera.start_preview()
-          time.sleep(1)
+    ## Capture passport picture
+    camera.rotation = 90
+    camera.start_preview()
+    time.sleep(1)
+    
+    camera.capture(r'/home/pi/DEProject/images/image-' + date_string + '.jpg')
+    camera.stop_preview()
+    turnOff()
+    
+    img = Image.open(r'/home/pi/DEProject/images/image-' + date_string + '.jpg')
+    text = pytesseract.image_to_string(img)
+    print(text)
           
-          camera.capture(r'/home/pi/DEProject/images/image-' + date_string + '.jpg')
-          camera.stop_preview()
-          turnOff()
+    ## Find the locate of MRZ location
+    MRZ_1 = text.splitlines()[0]
+    MRZ_2 = text.splitlines()[1]
+    #            print("Raw Line 1: ", MRZ_1)
+    #            print("Raw Line 2: ", MRZ_2)
+    print("Passport's Information\n")
           
-          img = Image.open(r'/home/pi/DEProject/images/image-' + date_string + '.jpg')
-          text = pytesseract.image_to_string(img)
-          print(text)
+    ## separate data mrz 1
+    if MRZ_1:
+        ns=""
+        for i in MRZ_1:
+            if(not i.isspace()):
+                ns+=i
+                #  print(ns)
+            mrz1 = ns
+        firstPart = mrz1.split("<<")[0]
+        
+        tPass = firstPart[0:1]        # P, indicating a passport
+        print("Type : ", tPass)
+        tCode = firstPart[2:5]      # Type for countries
+        print("Type for Countries: ", tCode)
+                
+        lastname = firstPart[5:len(firstPart)].replace("<", "-")      # Name & Seurname -> ????
+        print("Lastname: ",lastname)
+                
+        firstname = mrz1.split("<<")[1].replace("<","")
+        print("Firstname: ",firstname)
           
-          ## Find the locate of MRZ location
-          MRZ_1 = text.splitlines()[0]
-          MRZ_2 = text.splitlines()[1]
-          #            print("Raw Line 1: ", MRZ_1)
-          #            print("Raw Line 2: ", MRZ_2)
-          print("Passport's Information\n")
-          
-          ## separate data mrz 1
-          if MRZ_1:
-              ns=""
-              for i in MRZ_1:
-                  if(not i.isspace()):
-                      ns+=i
-                      #  print(ns)
-                  mrz1 = ns
-              firstPart = mrz1.split("<<")[0]
-              
-              tPass = firstPart[0]        # P, indicating a passport
-              print("Type : ", tPass)
+    ## separate data mrz 2
+    if MRZ_2:
+        ns=""
+        for i in MRZ_2:
+            if(not i.isspace()):
+                ns+=i
+                #   print(ns)
+            mrz2 = ns
+        # print(mrz2)
+        # print(len(mrz2))
                 
-              tCode = firstPart[2:5]      # Type for countries
-              print("Type for Countries: ", tCode)
+        passNum = mrz2[0:9]          # Passport number
+        print("Passport Number: ", passNum)
                 
-              lastname = firstPart[5:len(firstPart)].replace("<", "-")      # Name & Seurname -> ????
-              print("Lastname: ",lastname)
+        nCode = mrz2[10:13]          # Nationality Code
+        print("Nationality: ", nCode)
                 
-              firstname = mrz1.split("<<")[1].replace("<","")
-              print("Firstname: ",firstname)
-          
-          ## separate data mrz 2
-          if MRZ_2:
-              ns=""
-              for i in MRZ_2:
-                  if(not i.isspace()):
-                      ns+=i
-                      #   print(ns)
-                  mrz2 = ns
-                  # print(mrz2)
-                  # print(len(mrz2))
+        DOB = mrz2[13:19]           # Date of birth (YYMMDD)
+        print("Date of birth : ", DOB)
                 
-              passNum = mrz2[0:9]          # Passport number
-              print("Passport Number: ", passNum)
+        sex = mrz2[20]           # Sex  (M, F or < for male, female or unspecified)
+        print("Sex : ", sex)
                 
-              nCode = mrz2[10:13]          # Nationality Code
-              print("Nationality: ", nCode)
+        EDP = mrz2[21:27]           # Expiration date of passport (YYMMDD)
+        print("Expiration date of passport : ", EDP)
                 
-              DOB = mrz2[13:19]           # Date of birth (YYMMDD)
-              print("Date of birth : ", DOB)
-                
-              sex = mrz2[20]           # Sex  (M, F or < for male, female or unspecified)
-              print("Sex : ", sex)
-                
-              EDP = mrz2[21:27]           # Expiration date of passport (YYMMDD)
-              print("Expiration date of passport : ", EDP)
-                
-              persNum = mrz2[28:41]          # Personal number
-              print("Personal number : ", persNum)                  
+        persNum = mrz2[28:41]          # Personal number
+        print("Personal number : ", persNum)
+        
+        print("The process is Done.")
                       
 
 if __name__=="__main__":
     while True:
         button_state = GPIO.input(button)
+        turnOff()
         print("Please press the Button to start the process.")
         if button_state == False:
-            turnOff()
-            main()          
+            main()
                   
                   
             

@@ -77,7 +77,7 @@ if __name__=="__main__":
     #                   print(ns)
                       mrz1 = ns
                   firstPart = mrz1.split("<<")[0]
-                  tPass = firstPart[0]        # P, indicating a passport
+                  tPass = firstPart[0:1]        # P, indicating a passport
                   print("Type : ", tPass)
                   tCode = firstPart[2:5]      # Type for countries
                   print("Type for Countries: ", tCode)
