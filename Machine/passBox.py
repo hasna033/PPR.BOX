@@ -2,13 +2,13 @@ import RPi.GPIO as GPIO          #RGB LED
 from picamera import PiCamera    #Camera
 from PIL import Image
 from pytesseract import pytesseract
-import cv2
 import os
 import time
 
 red = 13  # Set up Red pin
 green = 11  # Set up Green pin
 blue = 15  # Set up Blue pin
+button = 18
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BOARD)  # Set GPIO mode to BOARD to use pin numbers
@@ -16,6 +16,7 @@ GPIO.setmode(GPIO.BOARD)  # Set GPIO mode to BOARD to use pin numbers
 GPIO.setup(red, GPIO.OUT)
 GPIO.setup(green, GPIO.OUT)
 GPIO.setup(blue, GPIO.OUT)
+GPIO.setup(button, GPIO.IN)
 
 camera = PiCamera()
 
@@ -35,17 +36,15 @@ def led():
     GPIO.output(red,GPIO.HIGH)
     GPIO.output(green,GPIO.HIGH)
     GPIO.output(blue,GPIO.HIGH)
+
     
 
 if __name__=="__main__":
 #     main()
 
       while True:
-          turnOff()
-          lightLevel=readLight()
-          print("Light Level : " + format(lightLevel,'.1f') + " lx")
-          time.sleep(1)
-          if lightLevel < 10:
+          button_state = GPIO.input(button)
+          if button_state == True:
               led()
               time.sleep(5)
               camera.rotation = 90
@@ -58,68 +57,70 @@ if __name__=="__main__":
               img = Image.open("/home/pi/DEProject/images/input8.jpg")
               text = pytesseract.image_to_string(img)
               print("Raw:", text)
+              break
+
               
               ## Find the locate of MRZ data
 #               print(len(text))       // 439
 #               print(text[336:430])
               ##  MRZ location
-              MRZ_1 = text[336:386]
-              MRZ_2 = text[387:430]
-              print("Raw Line 1: ", MRZ_1)
-              print("Raw Line 2:", MRZ_2)
-              
-              ### separate data mrz 1
-              if MRZ_1:
-                  ns=""
-                  for i in MRZ_1:
-                      if(not i.isspace()):
-                          ns+=i
-#                   print(ns)
-                  mrz1 = ns
-                  
-                  firstPart = mrz1.split("<<")[0]
-                  
-                  tPass = firstPart[0]        # P, indicating a passport
-#                   print("Type : ", tPass)
-                  tCode = firstPart[2:5]      # Type for countries
-#                   print("Type :" tCode)
-                  
-                  lastname = firstPart[5:len(firstPart)].replace("<", "-")      # Name & Seurname -> ????
-                  print("Lastname: ",lastname)
-                  
-                  firstname = mrz1.split("<<")[1].replace("<","")
-                  print("Firstname: ",firstname) 
-
-               ### separate data mrz 2
-              if MRZ_2:
-                  ns=""
-                  for i in MRZ_2:
-                      if(not i.isspace()):
-                          ns+=i
-#                   print(ns)
-                  mrz2 = ns
-                  print(mrz2)
-                  
-                  passNum = mrz2[0:9]          # Passport number
-                  print("Passport Number: ", passNum)
-                  
-                  nCode = mrz2[10:13]          # Nationality Code
-                  print("Nationality: ", nCode)
-                  
-                  DOB = mrz2[13:19]           # Date of birth (YYMMDD)
-                  print("Date of birth : ", DOB)
-                  
-                  sex = mrz2[20]           # Sex  (M, F or < for male, female or unspecified)
-                  print("Sex : ", sex)
-                  
-                  EDP = mrz2[21:27]           # Expiration date of passport (YYMMDD)
-                  print("Expiration date of passport : ", EDP)
-                  
-                  persNum = mrz2[28:41]          # Personal number
-                  print("Personal number : ", persNum)
-                  
-
-
+#           MRZ_1 = text[336:386]
+#           MRZ_2 = text[387:430]
+#           print("Raw Line 1: ", MRZ_1)
+#           print("Raw Line 2:", MRZ_2)
+#               
+#               ### separate data mrz 1
+#               if MRZ_1:
+#                   ns=""
+#                   for i in MRZ_1:
+#                       if(not i.isspace()):
+#                           ns+=i
+# #                   print(ns)
+#                   mrz1 = ns
+#                   
+#                   firstPart = mrz1.split("<<")[0]
+#                   
+#                   tPass = firstPart[0]        # P, indicating a passport
+# #                   print("Type : ", tPass)
+#                   tCode = firstPart[2:5]      # Type for countries
+# #                   print("Type :" tCode)
+#                   
+#                   lastname = firstPart[5:len(firstPart)].replace("<", "-")      # Name & Seurname -> ????
+#                   print("Lastname: ",lastname)
+#                   
+#                   firstname = mrz1.split("<<")[1].replace("<","")
+#                   print("Firstname: ",firstname) 
+# 
+#                ### separate data mrz 2
+#               if MRZ_2:
+#                   ns=""
+#                   for i in MRZ_2:
+#                       if(not i.isspace()):
+#                           ns+=i
+# #                   print(ns)
+#                   mrz2 = ns
+#                   print(mrz2)
+#                   
+#                   passNum = mrz2[0:9]          # Passport number
+#                   print("Passport Number: ", passNum)
+#                   
+#                   nCode = mrz2[10:13]          # Nationality Code
+#                   print("Nationality: ", nCode)
+#                   
+#                   DOB = mrz2[13:19]           # Date of birth (YYMMDD)
+#                   print("Date of birth : ", DOB)
+#                   
+#                   sex = mrz2[20]           # Sex  (M, F or < for male, female or unspecified)
+#                   print("Sex : ", sex)
+#                   
+#                   EDP = mrz2[21:27]           # Expiration date of passport (YYMMDD)
+#                   print("Expiration date of passport : ", EDP)
+#                   
+#                   persNum = mrz2[28:41]          # Personal number
+#                   print("Personal number : ", persNum)
+#                   
+#
+            
 
 
 
