@@ -1,6 +1,6 @@
 import RPi.GPIO as GPIO          #RGB LED
 from picamera import PiCamera    #Camera
-from PIL import Image
+from PIL import Image, ImageOps, ImageFilter
 from pytesseract import pytesseract
 import os
 import time
@@ -35,15 +35,47 @@ def led():
     GPIO.output(red,GPIO.HIGH)
     GPIO.output(green,GPIO.HIGH)
     GPIO.output(blue,GPIO.HIGH)
+
+def binarize(img):
+
+  #initialize threshold
+  thresh=95
+
+  #convert image to greyscale
+  img=img.convert('L') 
+
+  width,height=img.size
+
+  #traverse through pixels 
+  for x in range(width):
+    for y in range(height):
+
+      #if intensity less than threshold, assign white
+      if img.getpixel((x,y)) < thresh:
+        img.putpixel((x,y),0)
+
+      #if intensity greater than threshold, assign black 
+      else:
+        img.putpixel((x,y),255)
+
+  return img
+
+def preprocess(img):
+    img2 = img.crop((550,620,1800,780))
+    img2 = binarize(img2)
+    img2 = img2.filter(ImageFilter.EDGE_ENHANCE)
+    img2 = img2.filter(ImageFilter.SHARPEN)
+    img2.save(r'/home/pi/DEProject/images/prepocessed.jpg')
+    return img2
     
 def main():
 #       while True:
     print("\nStart the process.\n")
-    led()
+    #led()
     time.sleep(5)
           
     ## Capture passport picture
-    camera.rotation = 90
+    #camera.rotation = 90
     camera.start_preview()
     time.sleep(1)
     
@@ -52,9 +84,11 @@ def main():
     turnOff()
     
     img = Image.open(r'/home/pi/DEProject/images/image-' + date_string + '.jpg')
-    text = pytesseract.image_to_string(img)
+    # Preprocess image
+    img = preprocess(img)
+    text = pytesseract.image_to_string(img, lang='eng')
     print(text)
-          
+    
     ## Find the locate of MRZ location
     MRZ_1 = text.splitlines()[0]
     MRZ_2 = text.splitlines()[1]
@@ -116,12 +150,13 @@ def main():
                       
 
 if __name__=="__main__":
-    while True:
-        button_state = GPIO.input(button)
-        turnOff()
-        print("Please press the Button to start the process.")
-        if button_state == False:
-            main()
+    main()
+#     while True:
+#         button_state = GPIO.input(button)
+#         turnOff()
+#         print("Please press the Button to start the process.")
+#         if button_state == False:
+#             main()
                   
                   
             
