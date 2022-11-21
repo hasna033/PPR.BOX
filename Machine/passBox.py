@@ -5,17 +5,11 @@ from pytesseract import pytesseract
 import os
 import time
 
-red = 13            # Set up Red pin
-green = 11          # Set up Green pin
-blue = 15           # Set up Blue pin
 button = 18         # Set up button pin -> input
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BOARD)       # Set GPIO mode to BOARD to use pin numbers
 
-GPIO.setup(red, GPIO.OUT)
-GPIO.setup(green, GPIO.OUT)
-GPIO.setup(blue, GPIO.OUT)
 GPIO.setup(button, GPIO.IN, pull_up_down = GPIO.PUD_UP)
 
 camera = PiCamera()
@@ -26,20 +20,10 @@ pytesseract.tesseract_cmd = path_to_tesseract
 
 date_string = time.strftime("%Y-%m-%d-%H:%M")  
 
-def turnOff():
-    GPIO.output(red,GPIO.LOW)
-    GPIO.output(green,GPIO.LOW)
-    GPIO.output(blue,GPIO.LOW)
-    
-def led():
-    GPIO.output(red,GPIO.HIGH)
-    GPIO.output(green,GPIO.HIGH)
-    GPIO.output(blue,GPIO.HIGH)
-
 def binarize(img):
 
   #initialize threshold
-  thresh=95
+  thresh=122
 
   #convert image to greyscale
   img=img.convert('L') 
@@ -61,17 +45,16 @@ def binarize(img):
   return img
 
 def preprocess(img):
-    img2 = img.crop((550,620,1800,780))
-    img2 = binarize(img2)
-    img2 = img2.filter(ImageFilter.EDGE_ENHANCE)
-    img2 = img2.filter(ImageFilter.SHARPEN)
-    img2.save(r'/home/pi/DEProject/images/prepocessed.jpg')
-    return img2
+#     img = img.crop((550,620,1800,780))
+    img = binarize(img)
+    img = img.filter(ImageFilter.EDGE_ENHANCE)
+    img = img.filter(ImageFilter.SHARPEN)
+    img.save(r'/home/pi/DEProject/images/image-' + date_string + '.jpg')
+    return img
     
 def main():
 #       while True:
     print("\nStart the process.\n")
-    #led()
     time.sleep(5)
           
     ## Capture passport picture
@@ -81,7 +64,6 @@ def main():
     
     camera.capture(r'/home/pi/DEProject/images/image-' + date_string + '.jpg')
     camera.stop_preview()
-    turnOff()
     
     img = Image.open(r'/home/pi/DEProject/images/image-' + date_string + '.jpg')
     # Preprocess image
@@ -143,21 +125,22 @@ def main():
         EDP = mrz2[21:27]           # Expiration date of passport (YYMMDD)
         print("Expiration date of passport : ", EDP)
                 
-        persNum = mrz2[28:41]          # Personal number
-        print("Personal number : ", persNum)
+        # persNum = mrz2[28:41]          # Personal number
+        # print("Personal number : ", persNum)
         
         print("The process is Done.")
+        time.sleep(5)
+
                       
 
 if __name__=="__main__":
-    main()
-#     while True:
-#         button_state = GPIO.input(button)
-#         turnOff()
-#         print("Please press the Button to start the process.")
-#         if button_state == False:
-#             main()
-                  
+#     main()
+    while True:
+        button_state = GPIO.input(button)
+        print("Please press the Button to start the process.")
+        if button_state == False:
+            main()
+            break
                   
             
 
