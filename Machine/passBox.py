@@ -4,6 +4,7 @@ from PIL import Image, ImageOps, ImageFilter
 from pytesseract import pytesseract
 import os
 import time
+import pyrebase
 
 button = 18         # Set up button pin -> input
 
@@ -18,7 +19,19 @@ camera = PiCamera()
 path_to_tesseract = r'/usr/bin/tesseract'
 pytesseract.tesseract_cmd = path_to_tesseract
 
-date_string = time.strftime("%Y-%m-%d-%H:%M")  
+date_string = time.strftime("%Y-%m-%d-%H:%M")
+
+config = {
+  "apiKey": "AIzaSyA5cw36EoAEwInZAkVbi02QPddJ7WJS30E",
+  "authDomain": "passboxdatabase.firebaseapp.com",
+  "projectId": "passboxdatabase",
+  "databaseURL" : "https://console.firebase.google.com/u/1/project/passboxdatabase/firestore/data/~2FPassportInfo~2F1",
+  "storageBucket": "passboxdatabase.appspot.com",
+  "messagingSenderId": "118065945023",
+  "appId": "1:118065945023:web:55ff3611c97ff76e59690a",
+  "measurementId": "G-WZ7M17WFP5"
+}
+
 
 def binarize(img):
 
@@ -130,6 +143,25 @@ def main():
         
         print("The process is Done.")
         time.sleep(5)
+        
+        firebase = pyrebase.initialize_app(config)
+        database = firbase.database()
+        
+        data = {
+            "Type ": tPass,
+            "Type of Country ": tCode,
+            "Firstname ": firstname,
+            "Lastname ": lastname,
+            "Passport Number ": passNum,
+            "Nationality ": nCode,
+            "Date of birth ": DOB,
+            "Sex ": sex,
+            "Expiration date ": EDP
+            }
+        
+                
+        for i in range:
+            database.child("Passports").child(i).set(data)
 
                       
 
